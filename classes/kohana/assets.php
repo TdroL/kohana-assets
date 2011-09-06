@@ -3,18 +3,19 @@
 // TODO: implement Assets_Node
 class Kohana_Assets
 {
-	protected $_group = array(
-		'body' => array(
-			'js' => array(),
-		),
-		'head' => array(
-			'js' => array(),
-			'css' => array(),
-		),
-		'image' => NULL,
-	);
+	protected $_group;
 
-	protected $_item = array();
+	protected $_item;
+
+	public static function factory()
+	{
+		return new Assets;
+	}
+
+	public function __construct()
+	{
+		$this->reset();
+	}
 
 	public function __get($path)
 	{
@@ -47,7 +48,7 @@ class Kohana_Assets
 
 		$name = array_pop($parts);
 
-		$this->_item[$name] = $url;
+		$this->_item[$name] = $this->_parse_url($url);
 
 		if ( ! empty($parts))
 		{
@@ -70,29 +71,79 @@ class Kohana_Assets
 
 			$current[] = $name;
 		}
+
+		return $this;
+	}
+
+	public function reset()
+	{
+		$this->_group = array(
+			'body' => array(
+				'js' => array(),
+			),
+			'head' => array(
+				'js' => array(),
+				'css' => array(),
+			),
+			'image' => NULL,
+		);
+
+		$this->_item = array();
+
+		return $this;
 	}
 
 	public function remove($name)
 	{
 		if ( ! isset($this->_item[$name]))
 		{
-			return;
+			return $this;
 		}
 
 		unset($this->_item[$name]);
 
-		$this->_remove_name = $name;
-		$this->_group = array_map(array($this, '_remove_callback'), $this->_group);
+		$this->_group = $this->_remove_recursive($this->_group, $name);
+
+		return $this;
 	}
 
-	public function _remove_callback($value)
+	protected function _remove_recursive($value, $name)
 	{
 		if (is_array($value))
 		{
-			return array_map(array($this, '_remove_callback'), $value);
+			if (Arr::is_assoc($value))
+			{
+				foreach ($value as $k => $v)
+				{
+					$value[$k] = $this->_remove_recursive($v, $name);
+
+					if ($value[$k] === FALSE)
+					{
+						unset($value[$k]);
+					}
+				}
+			}
+			else
+			{
+				$tmp = array();
+
+				foreach ($value as $v)
+				{
+					$val = $this->_remove_recursive($v, $name);
+
+					if ($val !== FALSE)
+					{
+						$tmp[] = $val;
+					}
+				}
+
+				$value = $tmp;
+			}
+
+			return $value;
 		}
 
-		return !empty($value) AND $value != $this->_remove_name;
+		return ( ! empty($value) AND $value != $name) ? $value : FALSE;
 	}
 
 	public function head()
@@ -115,7 +166,18 @@ class Kohana_Assets
 		return $this->_item;
 	}
 
-	public function _node($node)
+	protected function _parse_url($url)
+	{
+		/* "//", "http://", "https://", "ftp://", "ftps://" */
+		if (preg_match('/^((ht|f)tps?:)?\/\//i', $url))
+		{
+			return $url;
+		}
+
+		return Url::site($url);
+	}
+
+	protected function _node($node)
 	{
 		if (Arr::is_array($node) AND ! Arr::is_assoc($node))
 		{
