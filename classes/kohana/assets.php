@@ -52,9 +52,9 @@ class Kohana_Assets
 
 		if ( ! empty($parts))
 		{
-			$current = &$this->_group;
+			$current = & $this->_group;
 
-			foreach($parts as $part)
+			foreach ($parts as $part)
 			{
 				if ( ! Arr::is_array($current))
 				{
@@ -66,7 +66,7 @@ class Kohana_Assets
 					$current[$part] = array();
 				}
 
-				$current = &$current[$part];
+				$current = & $current[$part];
 			}
 
 			$current[] = $name;
@@ -168,8 +168,8 @@ class Kohana_Assets
 
 	protected function _parse_url($url)
 	{
-		/* "//", "http://", "https://", "ftp://", "ftps://" */
-		if (preg_match('/^((ht|f)tps?:)?\/\//i', $url))
+		/* "//", "http://", "https://", "ftp://", "ftps://", "$base_url/" */
+		if (preg_match('/^(((ht|f)tps?:)?\/\/)|(^'.preg_quote(Url::base(), '/').')/iD', $url))
 		{
 			return $url;
 		}
