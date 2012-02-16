@@ -50,6 +50,7 @@ class Kohana_Assets
 
 		$this->_item[$name] = $this->_parse_url($url);
 
+		// TODO: rewrite to make use of Arr::set_path
 		if ( ! empty($parts))
 		{
 			$current = & $this->_group;
@@ -164,6 +165,39 @@ class Kohana_Assets
 	public function id()
 	{
 		return $this->_item;
+	}
+
+	public function as_array($remove_duplicate = FALSE)
+	{
+		$result = array();
+		$result['head']  = (array) $this->head();
+		$result['body']  = (array) $this->body();
+		$result['image'] = (array) $this->image();
+		$result['id']    = (array) $this->id();
+
+		if ($remove_duplicate)
+		{
+			foreach (array('head', 'body', 'image') as $field)
+			{
+				if (empty($result[$field]))
+				{
+					continue;
+				}
+
+				foreach ($result[$field] as $group)
+				{
+					foreach ($group as $asset)
+					{
+						if ($id = array_search($asset, $result['id']))
+						{
+							unset($result['id'][$id]);
+						}
+					}
+				}
+			}
+		}
+
+		return $result;
 	}
 
 	protected function _parse_url($url)
