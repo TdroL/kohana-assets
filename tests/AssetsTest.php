@@ -48,7 +48,7 @@ class AssetsTest extends PHPUnit_Framework_TestCase
 		$parts = explode('.', $name);
 		$name = array_pop($parts);
 
-		$this->assertSame(Url::site($url), $assets->get($name));
+		$this->assertSame(URL::site($url), $assets->get($name));
 	}
 
 	/**
@@ -69,7 +69,7 @@ class AssetsTest extends PHPUnit_Framework_TestCase
 		array_pop($parts);
 		$name = implode('.', $parts);
 
-		$this->assertSame(array(Url::site($url)), $assets->get($name));
+		$this->assertSame(array(URL::site($url)), $assets->get($name));
 	}
 
 	/**
@@ -91,7 +91,7 @@ class AssetsTest extends PHPUnit_Framework_TestCase
 
 		$id = $assets->id();
 
-		$this->assertSame(Url::site($url), Arr::get($id, $name));
+		$this->assertSame(URL::site($url), Arr::get($id, $name));
 	}
 
 	/**

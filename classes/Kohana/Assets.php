@@ -203,12 +203,12 @@ class Kohana_Assets
 	protected function _parse_url($url)
 	{
 		/* "//", "http://", "https://", "ftp://", "ftps://", "$base_url/" */
-		if (preg_match('/^(((ht|f)tps?:)?\/\/)|(^'.preg_quote(Url::base(), '/').')/iD', $url))
+		if (preg_match('/^(((ht|f)tps?:)?\/\/)|(^'.preg_quote(URL::base(), '/').')/iD', $url))
 		{
 			return $url;
 		}
 
-		return Url::site($url);
+		return URL::site($url);
 	}
 
 	protected function _node($node)
